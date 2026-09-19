@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Treasure Tussle</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #102a43, #176b87);
+        min-height: 100vh;
+        color: white;
+        padding: 25px;
+    }
+
+    /* ===== TITLE ===== */
+
+    .title {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .title h1 {
+        font-size: 42px;
+        color: #ffd166;
+        margin-bottom: 8px;
+    }
+
+    .title p {
+        font-size: 17px;
+        opacity: 0.9;
+    }
+
+    /* ===== SCORE ===== */
+
+    .scoreboard {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 25px;
+    }
+
+    .score {
+        padding: 12px 25px;
+        border-radius: 15px;
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+    .team-a-score {
+        background: #2878e8;
+    }
+
+    .team-b-score {
+        background: #21a66b;
+    }
+
+    /* ===== TWO BOARDS ===== */
+
+    .boards {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        max-width: 1100px;
+        margin: auto;
+    }
+
+    .team-board {
+        background: rgba(255,255,255,0.12);
+        padding: 20px;
+        border-radius: 25px;
+        backdrop-filter: blur(8px);
+    }
+
+    .team-name {
+        text-align: center;
+        font-size: 25px;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .team-a {
+        color: #6fb1ff;
+    }
+
+    .team-b {
+        color: #63e6a7;
+    }
+
+    /* ===== BINGO GRID ===== */
+
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    .tile {
+        height: 110px;
+        border: none;
+        border-radius: 15px;
+        background: #fff8df;
+        color: #17324d;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .tile:hover {
+        transform: scale(1.04);
+        background: #ffe9a8;
+    }
+
+    /* TEAM COLORS */
+
+    .tile.team-a-owned {
+        background: #2878e8;
+        color: white;
+    }
+
+    .tile.team-b-owned {
+        background: #21a66b;
+        color: white;
+    }
+
+    /* ===== MODAL ===== */
+
+    .modal {
+        display: none;
+
+        position: fixed;
+        inset: 0;
+
+        background: rgba(0,0,0,0.7);
+
+        justify-content: center;
+        align-items: center;
+
+        z-index: 100;
+    }
+
+    .modal.show {
+        display: flex;
+    }
+
+    .modal-box {
+        background: white;
+        color: #17324d;
+
+        width: 90%;
+        max-width: 600px;
+
+        padding: 30px;
+
+        border-radius: 25px;
+
+        text-align: center;
+    }
+
+    .modal-box h2 {
+        margin-bottom: 20px;
+        color: #176b87;
+    }
+
+    .question {
+        font-size: 22px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    /* ===== ANSWERS ===== */
+
+    .answers {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .answer {
+        padding: 15px;
+
+        border: 2px solid #d9e2ec;
+        border-radius: 12px;
+
+        background: #f5f8fa;
+
+        cursor: pointer;
+
+        font-size: 17px;
+        font-weight: bold;
+    }
+
+    .answer:hover {
+        background: #e5f1ff;
+    }
+
+    /* ===== FEEDBACK ===== */
+
+    .feedback {
+        font-size: 25px;
+        font-weight: bold;
+
+        margin-top: 20px;
+
+        display: none;
+    }
+
+    .correct {
+        color: #21a66b;
+    }
+
+    .wrong {
+        color: #e05252;
+    }
+
+    /* ===== CLOSE BUTTON ===== */
+
+    .close-btn {
+        margin-top: 20px;
+
+        padding: 12px 25px;
+
+        border: none;
+        border-radius: 10px;
+
+        background: #17324d;
+        color: white;
+
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    /* ===== SURPRISE ===== */
+
+    .surprise {
+        font-size: 70px;
+        margin-bottom: 15px;
+    }
+
+    .surprise-text {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    /* ===== WINNER ===== */
+
+    .winner {
+        display: none;
+
+        position: fixed;
+        inset: 0;
+
+        background: rgba(0,0,0,0.8);
+
+        justify-content: center;
+        align-items: center;
+
+        z-index: 200;
+    }
+
+    .winner.show {
+        display: flex;
+    }
+
+    .winner-box {
+        background: white;
+        color: #17324d;
+
+        padding: 45px;
+
+        border-radius: 25px;
+
+        text-align: center;
+    }
+
+    .winner-box h1 {
+        font-size: 40px;
+        color: #f0a500;
+        margin-bottom: 20px;
+    }
+
+    .reset-btn {
+        margin-top: 20px;
+
+        padding: 12px 25px;
+
+        border: none;
+        border-radius: 10px;
+
+        background: #176b87;
+        color: white;
+
+        cursor: pointer;
+    }
+
+    /* ===== MOBILE ===== */
+
+    @media(max-width: 800px) {
+
+        .boards {
+            grid-template-columns: 1fr;
+        }
+
+        .title h1 {
+            font-size: 32px;
+        }
+    }
+</style>
+</head>
+
+
+<body>
+
+<!-- =====================================
+     TITLE
+===================================== -->
+
+<div class="title">
+
+    <h1>🗺️ TREASURE TUSSLE</h1>
+
+    <p>
+        Answer • Capture • Steal • Win!
+    </p>
+
+</div>
+
+
+<!-- =====================================
+     SCORE
+===================================== -->
+
+<div class="scoreboard">
+
+    <div class="score team-a-score">
+        🟦 TEAM A:
+        <span id="scoreA">0</span>
+    </div>
+
+    <div class="score team-b-score">
+        🟩 TEAM B:
+        <span id="scoreB">0</span>
+    </div>
+
+</div>
+
+
+<!-- =====================================
+     TWO BINGO BOARDS
+===================================== -->
+
+<div class="boards">
+
+
+    <!-- TEAM A -->
+
+    <div class="team-board">
+
+        <div class="team-name team-a">
+            🟦 TEAM A
+        </div>
+
+        <div
+            class="grid"
+            id="boardA">
+        </div>
+
+    </div>
+
+
+    <!-- TEAM B -->
+
+    <div class="team-board">
+
+        <div class="team-name team-b">
+            🟩 TEAM B
+        </div>
+
+        <div
+            class="grid"
+            id="boardB">
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================
+     QUESTION MODAL
+===================================== -->
+
+<div
+    class="modal"
+    id="questionModal"
+>
+
+    <div class="modal-box">
+
+        <h2 id="modalTitle">
+            QUESTION
+        </h2>
+
+        <div
+            class="question"
+            id="questionText">
+        </div>
+
+
+        <div
+            class="answers"
+            id="answers">
+        </div>
+
+
+        <div
+            class="feedback"
+            id="feedback">
+        </div>
+
+
+        <button
+            class="close-btn"
+            id="closeModal"
+        >
+            Continue
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================
+     SURPRISE MODAL
+===================================== -->
+
+<div
+    class="modal"
+    id="surpriseModal"
+>
+
+    <div class="modal-box">
+
+        <div
+            class="surprise"
+            id="surpriseIcon">
+            🎁
+        </div>
+
+        <h2 id="surpriseTitle">
+            SURPRISE!
+        </h2>
+
+        <div
+            class="surprise-text"
+            id="surpriseText">
+        </div>
+
+        <button
+            class="close-btn"
+            id="surpriseClose">
+            Continue
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =====================================
+     WINNER
+===================================== -->
+
+<div
+    class="winner"
+    id="winner">
+
+    <div class="winner-box">
+
+        <h1>
+            🏆 BINGO!
+        </h1>
+
+        <h2 id="winnerTeam">
+        </h2>
+
+        <p>
+            Congratulations!
+        </p>
+
+        <button
+            class="reset-btn"
+            onclick="resetGame()">
+            Play Again
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+/* =====================================
+   GAME DATA
+===================================== */
+
+/*
+    owner:
+
+    null = chưa có đội nào
+
+    "A" = Team A
+
+    "B" = Team B
+*/
+
+let owner = Array(12).fill(null);
+
+
+/*
+    Đánh dấu ô đã được mở.
+
+    true = đã mở
+
+    false = chưa mở
+*/
+
+let opened = Array(12).fill(false);
+
+
+/*
+    Câu hỏi mẫu
+
+    Sau này mình sẽ thay bằng
+    câu hỏi thật của bạn.
+*/
+
+const questions = [
+
+    {
+        question:
+        "Choose the correct preposition: The book is ___ the table.",
+
+        answers:
+        [
+            "in",
+            "on",
+            "at",
+            "to"
+        ],
+
+        correct: 1
+    },
+
+
+    {
+        question:
+        "Which sentence is correct?",
+
+        answers:
+        [
+            "She go to school.",
+            "She goes to school.",
+            "She going to school.",
+            "She gone to school."
+        ],
+
+        correct: 1
+    },
+
+
+    {
+        question:
+        "I ___ English every day.",
+
+        answers:
+        [
+            "study",
+            "studies",
+            "studying",
+            "studied"
+        ],
+
+        correct: 0
+    },
+
+
+    {
+        question:
+        "Which one is a preposition?",
+
+        answers:
+        [
+            "quickly",
+            "beautiful",
+            "under",
+            "happily"
+        ],
+
+        correct: 2
+    },
+
+
+    {
+        question:
+        "The students are ___ the classroom.",
+
+        answers:
+        [
+            "in",
+            "to",
+            "from",
+            "by"
+        ],
+
+        correct: 0
+    },
+
+
+    {
+        question:
+        "Yesterday, they ___ football.",
+
+        answers:
+        [
+            "play",
+            "plays",
+            "played",
+            "playing"
+        ],
+
+        correct: 2
+    },
+
+
+    {
+        question:
+        "The cat is ___ the chair.",
+
+        answers:
+        [
+            "under",
+            "quickly",
+            "beautiful",
+            "happily"
+        ],
+
+        correct: 0
+    },
+
+
+    {
+        question:
+        "We arrived ___ school at 7 a.m.",
+
+        answers:
+        [
+            "on",
+            "in",
+            "at",
+            "to"
+        ],
+
+        correct: 2
+    },
+
+
+    {
+        question:
+        "Choose the correct sentence.",
+
+        answers:
+        [
+            "He is good in English.",
+            "He is good at English.",
+            "He good at English.",
+            "He is good on English."
+        ],
+
+        correct: 1
+    },
+
+
+    {
+        question:
+        "She is sitting ___ her friend.",
+
+        answers:
+        [
+            "between",
+            "next to",
+            "during",
+            "because"
+        ],
+
+        correct: 1
+    },
+
+
+    {
+        question:
+        "The picture is ___ the wall.",
+
+        answers:
+        [
+            "on",
+            "at",
+            "to",
+            "between"
+        ],
+
+        correct: 0
+    },
+
+
+    {
+        question:
+        "He walked ___ the room.",
+
+        answers:
+        [
+            "into",
+            "beautiful",
+            "quickly",
+            "happy"
+        ],
+
+        correct: 0
+    }
+
+];
+
+
+
+/* =====================================
+   SURPRISE EVENTS
+===================================== */
+
+const surprises = [
+
+    {
+        icon: "💎",
+
+        title: "LUCKY TREASURE!",
+
+        text:
+        "Bạn được quyền cướp một ô của đội đối phương!"
+    },
+
+
+    {
+        icon: "💣",
+
+        title: "TRAP!",
+
+        text:
+        "Một ô của đội bạn sẽ bị chuyển sang đối phương!"
+    },
+
+
+    {
+        icon: "🛡️",
+
+        title: "SHIELD!",
+
+        text:
+        "Bạn được bảo vệ một ô khỏi bị chuyển!"
+    },
+
+
+    {
+        icon: "🔄",
+
+        title: "SWITCH!",
+
+        text:
+        "Bạn có thể đổi một ô của mình với đối phương!"
+    }
+
+];
+
+
+
+/* =====================================
+   WHICH TILES ARE SURPRISE?
+===================================== */
+
+/*
+    0 = question
+
+    1 = surprise
+
+    Ví dụ:
+
+    Ô 3
+    Ô 6
+    Ô 9
+    Ô 12
+
+    là surprise.
+*/
+
+const surpriseTiles = [
+    2,
+    5,
+    8,
+    11
+];
+
+
+
+/* =====================================
+   CREATE BOARDS
+===================================== */
+
+function createBoards() {
+
+    const boardA =
+        document.getElementById("boardA");
+
+    const boardB =
+        document.getElementById("boardB");
+
+
+    boardA.innerHTML = "";
+    boardB.innerHTML = "";
+
+
+    for(let i = 0; i < 12; i++) {
+
+        boardA.appendChild(
+            createTile(i, "A")
+        );
+
+        boardB.appendChild(
+            createTile(i, "B")
+        );
+
+    }
+
+}
+
+
+
+function createTile(index, team) {
+
+    const button =
+        document.createElement("button");
+
+
+    button.className = "tile";
+
+
+    /*
+        Số ô
+    */
+
+    button.innerText =
+        index + 1;
+
+
+    /*
+        Nếu ô thuộc Team A
+    */
+
+    if(owner[index] === "A") {
+
+        button.classList.add(
+            "team-a-owned"
+        );
+
+    }
+
+
+    /*
+        Nếu ô thuộc Team B
+    */
+
+    if(owner[index] === "B") {
+
+        button.classList.add(
+            "team-b-owned"
+        );
+
+    }
+
+
+    /*
+        Nếu ô đã được mở
+    */
+
+    if(opened[index]) {
+
+        button.disabled = true;
+
+    }
+
+
+    /*
+        Click vào ô
+    */
+
+    button.onclick = function() {
+
+        selectTile(
+            index,
+            team
+        );
+
+    };
+
+
+    return button;
+
+}
+
+
+
+/* =====================================
+   SELECT TILE
+===================================== */
+
+let selectedTile = null;
+
+let selectedTeam = null;
+
+
+
+function selectTile(index, team) {
+
+
+    /*
+        Nếu ô đã mở
+        thì không cho chọn nữa.
+    */
+
+    if(opened[index]) {
+
+        return;
+
+    }
+
+
+    selectedTile = index;
+
+    selectedTeam = team;
+
+
+    /*
+        Kiểm tra đây là
+        QUESTION hay SURPRISE
+    */
+
+    if(
+        surpriseTiles.includes(index)
+    ) {
+
+        showSurprise();
+
+    }
+
+    else {
+
+        showQuestion();
+
+    }
+
+}
+
+
+
+/* =====================================
+   SHOW QUESTION
+===================================== */
+
+function showQuestion() {
+
+
+    const modal =
+        document.getElementById(
+            "questionModal"
+        );
+
+
+    const questionText =
+        document.getElementById(
+            "questionText"
+        );
+
+
+    const answers =
+        document.getElementById(
+            "answers"
+        );
+
+
+    const feedback =
+        document.getElementById(
+            "feedback"
+        );
+
+
+    const question =
+        questions[selectedTile];
+
+
+    questionText.innerText =
+        question.question;
+
+
+    answers.innerHTML = "";
+
+
+    feedback.style.display =
+        "none";
+
+
+    /*
+        Tạo 4 đáp án
+    */
+
+    question.answers.forEach(
+        function(answer, index) {
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.className =
+                "answer";
+
+
+            button.innerText =
+                answer;
+
+
+            button.onclick =
+                function() {
+
+                    checkAnswer(
+                        index
+                    );
+
+                };
+
+
+            answers.appendChild(
+                button
+            );
+
+        }
+    );
+
+
+    modal.classList.add("show");
+
+}
+
+
+
+/* =====================================
+   CHECK ANSWER
+===================================== */
+
+function checkAnswer(
+    answerIndex
+) {
+
+
+    const question =
+        questions[selectedTile];
+
+
+    const feedback =
+        document.getElementById(
+            "feedback"
+        );
+
+
+    /*
+        ĐÚNG
+    */
+
+    if(
+        answerIndex ===
+        question.correct
+    ) {
+
+
+        feedback.innerText =
+            "🎉 CORRECT!";
+
+
+        feedback.className =
+            "feedback correct";
+
+
+        feedback.style.display =
+            "block";
+
+
+        /*
+            Đội đang chơi
+            giữ ô.
+        */
+
+        owner[selectedTile] =
+            selectedTeam;
+
+
+    }
+
+
+    /*
+        SAI
+    */
+
+    else {
+
+
+        feedback.innerText =
+            "❌ WRONG! Ô này chuyển sang đội đối phương!";
+
+
+        feedback.className =
+            "feedback wrong";
+
+
+        feedback.style.display =
+            "block";
+
+
+        /*
+            Ô chuyển sang đội kia
+        */
+
+        if(selectedTeam === "A") {
+
+            owner[selectedTile] =
+                "B";
+
+        }
+
+        else {
+
+            owner[selectedTile] =
+                "A";
+
+        }
+
+    }
+
+
+    /*
+        Đánh dấu ô đã mở
+    */
+
+    opened[selectedTile] =
+        true;
+
+
+    /*
+        Cập nhật bảng
+    */
+
+    createBoards();
+
+
+    /*
+        Kiểm tra Bingo
+    */
+
+    checkBingo();
+
+}
+
+
+
+/* =====================================
+   SHOW SURPRISE
+===================================== */
+
+function showSurprise() {
+
+
+    const modal =
+        document.getElementById(
+            "surpriseModal"
+        );
+
+
+    /*
+        Random một sự kiện
+    */
+
+    const surprise =
+        surprises[
+            Math.floor(
+                Math.random() *
+                surprises.length
+            )
+        ];
+
+
+    document.getElementById(
+        "surpriseIcon"
+    ).innerText =
+        surprise.icon;
+
+
+    document.getElementById(
+        "surpriseTitle"
+    ).innerText =
+        surprise.title;
+
+
+    document.getElementById(
+        "surpriseText"
+    ).innerText =
+        surprise.text;
+
+
+    modal.classList.add(
+        "show"
+    );
+
+
+    /*
+        Tạm thời:
+        ô thuộc về đội chọn.
+    */
+
+    owner[selectedTile] =
+        selectedTeam;
+
+
+    opened[selectedTile] =
+        true;
+
+
+    createBoards();
+
+}
+
+
+
+/* =====================================
+   CLOSE QUESTION
+===================================== */
+
+document.getElementById(
+    "closeModal"
+).onclick = function() {
+
+    document.getElementById(
+        "questionModal"
+    ).classList.remove(
+        "show"
+    );
+
+
+    checkBingo();
+
+};
+
+
+
+/* =====================================
+   CLOSE SURPRISE
+===================================== */
+
+document.getElementById(
+    "surpriseClose"
+).onclick = function() {
+
+    document.getElementById(
+        "surpriseModal"
+    ).classList.remove(
+        "show"
+    );
+
+
+    checkBingo();
+
+};
+
+
+
+/* =====================================
+   CHECK BINGO
+===================================== */
+
+function checkBingo() {
+
+
+    /*
+        Với bảng 3 x 4:
+
+        4 ô ngang
+        hoặc
+        3 ô dọc
+
+        là Bingo.
+
+        Mình cũng thêm
+        2 đường chéo.
+    */
+
+
+    const lines = [
+
+        // ngang
+
+        [0,1,2,3],
+
+        [4,5,6,7],
+
+        [8,9,10,11],
+
+
+        // dọc
+
+        [0,4,8],
+
+        [1,5,9],
+
+        [2,6,10],
+
+        [3,7,11],
+
+
+        // chéo
+
+        [0,5,10],
+
+        [2,5,8]
+
+    ];
+
+
+    for(
+        let line of lines
+    ) {
+
+
+        /*
+            Team A
+        */
+
+        if(
+            line.every(
+                index =>
+                owner[index] === "A"
+            )
+        ) {
+
+            showWinner(
+                "🟦 TEAM A"
+            );
+
+            return;
+
+        }
+
+
+        /*
+            Team B
+        */
+
+        if(
+            line.every(
+                index =>
+                owner[index] === "B"
+            )
+        ) {
+
+            showWinner(
+                "🟩 TEAM B"
+            );
+
+            return;
+
+        }
+
+    }
+
+}
+
+
+
+/* =====================================
+   SHOW WINNER
+===================================== */
+
+function showWinner(team) {
+
+
+    document.getElementById(
+        "winnerTeam"
+    ).innerText =
+        team + " WINS!";
+
+
+    document.getElementById(
+        "winner"
+    ).classList.add(
+        "show"
+    );
+
+}
+
+
+
+/* =====================================
+   RESET GAME
+===================================== */
+
+function resetGame() {
+
+
+    owner =
+        Array(12).fill(null);
+
+
+    opened =
+        Array(12).fill(false);
+
+
+    document.getElementById(
+        "winner"
+    ).classList.remove(
+        "show"
+    );
+
+
+    createBoards();
+
+}
+
+
+
+/* =====================================
+   START GAME
+===================================== */
+
+createBoards();
+
+</script>
+
+</body>
+</html>
